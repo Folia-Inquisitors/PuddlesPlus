@@ -1,0 +1,11 @@
+# ---------------------------------
+# PuddlesPlus by abhiram
+# ---------------------------------
+
+puddle-task-rate: 20
+
+radius: 10
+
+max-puddles: 20
+
+cluster-size: 6

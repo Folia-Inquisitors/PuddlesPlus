@@ -1,0 +1,7 @@
+name: PuddlesPlus
+version: '${project.version}'
+main: me.abhiram.puddlesplus.PuddlesPlus
+api-version: '1.21'
+folia-supported: true
+depend:
+  - ProtocolLib

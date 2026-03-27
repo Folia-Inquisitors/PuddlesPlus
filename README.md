@@ -4,6 +4,12 @@
 
 https://discord.gg/aT9z7q7hX8
 
+## Description
+
+This plugin creates puddles when it rains.
+
+- Commissioned by Yomamaeatstoes, created by Abhiram. 
+
 ## Building instructions
 
 mvn clean package
@@ -11,11 +17,6 @@ mvn clean package
 ### Hard Dependencies
 > - [packetevents](https://github.com/retrooper/packetevents) *Purpose: The main dependency that FakePlayers needs to function*
 
-## Description
-
-This plugin creates puddles when it rains.
-
-- Commissioned by Yomamaeatstoes, created by Abhiram. 
 
 ### Folia inquisitors
 

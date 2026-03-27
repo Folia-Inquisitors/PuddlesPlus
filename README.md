@@ -4,13 +4,16 @@
 
 https://discord.gg/aT9z7q7hX8
 
-## Building instructions
-
-mvn clean package
- 
 ## Description
 
 This plugin creates puddles when it rains.
+
+## Building instructions
+
+mvn clean package
+
+### Hard Dependencies
+> - [packetevents](https://github.com/retrooper/packetevents) *Purpose: The main dependency that FakePlayers needs to function*
 
 - Commissioned by Yomamaeatstoes, created by Abhiram. 
 

@@ -1,7 +1,5 @@
 package me.abhiram.puddlesplus;
 
-import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.ProtocolManager;
 import me.abhiram.puddlesplus.file.PluginConfig;
 import me.abhiram.puddlesplus.listener.GenericListener;
 import me.abhiram.puddlesplus.manager.PuddleManager;
@@ -14,7 +12,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class PuddlesPlus extends JavaPlugin {
 
     private PuddleManager puddleManager;
-    private ProtocolManager protocolManager;
 
     private PluginConfig pluginConfig;
 
@@ -32,14 +29,6 @@ public final class PuddlesPlus extends JavaPlugin {
     @Override
     public void onEnable() {
         // Plugin startup logic
-
-        if(Bukkit.getPluginManager().getPlugin("ProtocolLib") == null) {
-            getLogger().info("Protocol lib not found, so cannot initialize the plugin!");
-            Bukkit.getPluginManager().disablePlugin(this);
-            return;
-        }
-
-        protocolManager = ProtocolLibrary.getProtocolManager();
 
         int taskRate = this.pluginConfig.getConfig().getInt("puddle-task-rate");
 
@@ -73,10 +62,6 @@ public final class PuddlesPlus extends JavaPlugin {
 
     public PuddleManager getPuddleManager() {
         return this.puddleManager;
-    }
-
-    public ProtocolManager getProtocolManager(){
-        return this.protocolManager;
     }
 
     public PluginConfig getPluginConfig() {

@@ -2,11 +2,10 @@ package me.abhiram.puddlesplus;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
-import io.papermc.paper.threadedregions.scheduler.AsyncScheduler;
 import me.abhiram.puddlesplus.file.PluginConfig;
 import me.abhiram.puddlesplus.listener.GenericListener;
 import me.abhiram.puddlesplus.manager.PuddleManager;
-import me.abhiram.puddlesplus.render.PuddleRendererBuilder;
+import me.abhiram.puddlesplus.render.PuddleRenderer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -25,9 +24,7 @@ public final class PuddlesPlus extends JavaPlugin {
 
         this.pluginConfig = new PluginConfig(this);
 
-        this.puddleManager = new PuddleManager(new PuddleRendererBuilder(this)
-                .type(PuddleRendererBuilder.RendererType.PACKET_WATER)
-                .build(), this);
+        this.puddleManager = new PuddleManager(PuddleRenderer.create(this), this);
     }
 
 

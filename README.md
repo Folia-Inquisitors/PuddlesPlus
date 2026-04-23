@@ -14,11 +14,9 @@ This plugin creates puddles when it rains.
 
 mvn clean package
 
-### Hard Dependencies
-> - [packetevents](https://github.com/retrooper/packetevents) *Purpose: The main dependency that FakePlayers needs to function*
-
 
 ### Folia inquisitors
 
 [<img src="https://github.com/Folia-Inquisitors.png" width=80 alt="Folia-Inquisitors">](https://github.com/orgs/Folia-Inquisitors/repositories)
-[<img src="https://github.com/abhithedev200.png" width=80 alt="HSGamer">](https://github.com/abhithedev200)
+[<img src="https://github.com/abhithedev200.png" width=80 alt="abhithedev200">](https://github.com/abhithedev200)
+[<img src="https://github.com/HSGamer.png" width=80 alt="HSGamer">](https://github.com/HSGamer)

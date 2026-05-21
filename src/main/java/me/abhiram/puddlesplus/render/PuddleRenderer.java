@@ -14,5 +14,9 @@ public interface PuddleRenderer {
 
     void render(Player player, Set<Puddle> puddles);
 
-    void clear(Player player);
+    void clear(Player player, boolean restoreBlocks);
+
+    default void clear(Player player) {
+        clear(player, true);
+    }
 }

@@ -6,63 +6,63 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.logging.Level;
 
-public class AbstractFile{
-    private PuddlesPlus plugin;
-    private File file;
+public class AbstractFile {
+    private final PuddlesPlus plugin;
+    private final File file;
     protected FileConfiguration configuration;
-    protected Boolean save;
 
 
-    public AbstractFile(PuddlesPlus plugin, String filename, String datafolder, Boolean save)
-    {
+    public AbstractFile(PuddlesPlus plugin, String filename, String datafolder, boolean saveResource) {
         this.plugin = plugin;
-        File file1 = new File(plugin.getDataFolder() + datafolder);
+        File directory = datafolder == null || datafolder.isBlank()
+                ? plugin.getDataFolder()
+                : new File(plugin.getDataFolder(), datafolder);
 
-        if(!file1.exists())
-        {
-            file1.mkdirs();
+        if (!directory.exists() && !directory.mkdirs()) {
+            plugin.getLogger().warning("Unable to create config directory: " + directory.getPath());
         }
 
-        file = new File(file1,filename);
-        if(!file.exists())
-        {
-            if(save)
-            {
-                this.plugin.saveResource(filename,false);
+        file = new File(directory, filename);
+        if (!file.exists()) {
+            if (saveResource) {
+                this.plugin.saveResource(filename, false);
                 configuration = YamlConfiguration.loadConfiguration(file);
                 return;
             }
 
-            try
-            {
-                file.createNewFile();
-            }catch (Exception exp)
-            {
-                exp.printStackTrace();
+            try {
+                if (!file.createNewFile()) {
+                    plugin.getLogger().warning("Unable to create config file: " + file.getPath());
+                }
+            } catch (IOException exp) {
+                plugin.getLogger().log(Level.WARNING, "Unable to create config file: " + file.getPath(), exp);
             }
         }
 
         configuration = YamlConfiguration.loadConfiguration(file);
     }
 
-    public void save(){
-        try{
+    public void save() {
+        try {
             configuration.save(file);
-        }catch(IOException e){
-            plugin.getLogger().info("Unable to Save Config File!");
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.WARNING, "Unable to save config file: " + file.getPath(), e);
         }
     }
 
-    public FileConfiguration getConfig(){
+    public FileConfiguration getConfig() {
         return configuration;
     }
 
-    public void reload(){
+    public void reload() {
         configuration = YamlConfiguration.loadConfiguration(file);
     }
 
     public void delete() {
-        file.delete();
+        if (file.exists() && !file.delete()) {
+            plugin.getLogger().warning("Unable to delete config file: " + file.getPath());
+        }
     }
 }

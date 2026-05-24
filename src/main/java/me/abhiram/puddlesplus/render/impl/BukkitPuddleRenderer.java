@@ -7,7 +7,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Levelled;
 import org.bukkit.entity.Player;
 
@@ -17,11 +16,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class BukkitPuddleRenderer implements PuddleRenderer {
     private final PuddlesPlus plugin;
 
-    // Active puddles (positions only)
-    private final Map<UUID, Set<Location>> active = new ConcurrentHashMap<>();
-
-    // Original block states (for restore)
-    private final Map<UUID, Map<Location, BlockData>> original = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<Location, Integer>> active = new ConcurrentHashMap<>();
 
     public BukkitPuddleRenderer(PuddlesPlus plugin) {
         this.plugin = plugin;
@@ -32,71 +27,89 @@ public class BukkitPuddleRenderer implements PuddleRenderer {
         final World playerWorld = player.getWorld();
         final UUID uuid = player.getUniqueId();
 
-        final Set<Location> newLocations = new HashSet<>();
-        final Map<Location, BlockData> originalSnapshot = original.computeIfAbsent(uuid, k -> new ConcurrentHashMap<>());
+        final Map<Location, Integer> newLocations = new HashMap<>();
 
         for (Puddle puddle : puddles) {
+            if (!playerWorld.getUID().equals(puddle.worldId())) continue;
+
             Location location = new Location(playerWorld, puddle.x(), puddle.y(), puddle.z());
-            newLocations.add(location);
-            originalSnapshot.computeIfAbsent(location, p -> player.getWorld().getBlockAt(location).getBlockData());
+            newLocations.put(location, puddle.depth());
         }
 
-        Set<Location> previous = active.getOrDefault(uuid, Collections.emptySet());
+        Map<Location, Integer> previous = active.getOrDefault(uuid, Collections.emptyMap());
 
-        // Compute diff (only send changes)
-        Set<Location> toAdd = new HashSet<>(newLocations);
-        toAdd.removeAll(previous);
+        Map<Location, Integer> toAdd = new HashMap<>();
+        for (Map.Entry<Location, Integer> entry : newLocations.entrySet()) {
+            Integer previousDepth = previous.get(entry.getKey());
 
-        Set<Location> toRemove = new HashSet<>(previous);
-        toRemove.removeAll(newLocations);
+            if (!entry.getValue().equals(previousDepth)) {
+                toAdd.put(entry.getKey(), entry.getValue());
+            }
+        }
 
-        active.put(uuid, newLocations);
+        Set<Location> toRemove = new HashSet<>(previous.keySet());
+        toRemove.removeAll(newLocations.keySet());
+
+        if (newLocations.isEmpty()) {
+            active.remove(uuid);
+        } else {
+            active.put(uuid, Collections.unmodifiableMap(new HashMap<>(newLocations)));
+        }
+
+        if (toAdd.isEmpty() && toRemove.isEmpty()) return;
 
         player.getScheduler().run(plugin, (task) -> {
             sendWater(player, toAdd);
-            restore(player, uuid, toRemove);
+            restore(player, toRemove);
         }, null);
     }
 
-    private void sendWater(Player player, Set<Location> locations) {
+    private void sendWater(Player player, Map<Location, Integer> locations) {
         if (locations.isEmpty()) return;
 
-        Levelled water = (Levelled) Bukkit.createBlockData(Material.WATER);
-        water.setLevel(7);
+        for (Map.Entry<Location, Integer> entry : locations.entrySet()) {
+            Location location = entry.getKey();
 
-        for (Location location : locations) {
+            World world = location.getWorld();
+
+            if (world == null || !world.equals(player.getWorld())) continue;
+
+            Levelled water = (Levelled) Bukkit.createBlockData(Material.WATER);
+            water.setLevel(toWaterLevel(entry.getValue()));
+
             player.sendBlockChange(location, water);
         }
     }
 
-    private void restore(Player player, UUID uuid, Set<Location> locations) {
+    private int toWaterLevel(int depth) {
+        if (depth >= 3) return 5;
+        if (depth == 2) return 6;
+
+        return 7;
+    }
+
+    private void restore(Player player, Set<Location> locations) {
         if (locations.isEmpty()) return;
 
-        Map<Location, BlockData> map = original.get(uuid);
-        if (map == null) return;
-
         for (Location location : locations) {
-            BlockData data = map.remove(location);
-            if (data == null) continue;
-            player.sendBlockChange(location, data);
+            World world = location.getWorld();
+
+            if (world == null || !world.equals(player.getWorld())) continue;
+
+            player.sendBlockChange(location, world.getBlockAt(location).getBlockData());
         }
     }
 
     @Override
-    public void clear(Player player) {
+    public void clear(Player player, boolean restoreBlocks) {
         UUID uuid = player.getUniqueId();
 
-        Set<Location> positions = active.remove(uuid);
-        Map<Location, BlockData> map = original.remove(uuid);
+        Map<Location, Integer> positions = active.remove(uuid);
 
-        if (positions == null || map == null) return;
+        if (positions == null || positions.isEmpty() || !restoreBlocks) return;
 
         player.getScheduler().run(plugin, task -> {
-            for (Location location : positions) {
-                BlockData data = map.get(location);
-                if (data == null) continue;
-                player.sendBlockChange(location, data);
-            }
+            restore(player, positions.keySet());
         }, null);
     }
 }

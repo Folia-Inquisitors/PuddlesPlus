@@ -2,10 +2,33 @@
 # PuddlesPlus by abhiram
 # ---------------------------------
 
+# PACKET is the active mode in this build.
+# REAL_BLOCK is reserved for the later world-editing implementation.
+puddle-mode: PACKET
+
 puddle-task-rate: 20
 
-radius: 10
+radius: 20
 
-max-puddles: 20
+max-puddles-per-world: 300
 
-cluster-size: 6
+growth:
+  seed-chance: 0.16
+  seed-attempts-per-cycle: 6
+  expand-chance: 0.08
+  single-puddle-expand-chance: 0.025
+  thunderstorm-multiplier: 2.0
+  max-expansions-per-cycle: 2
+  max-puddle-size: 5
+  nearby-puddles-to-merge: 3
+  merge-search-radius: 4
+  max-depth: 3
+
+drying:
+  start-after-rain-seconds: 5.0
+  shrink-chance: 0.18
+
+real-puddles:
+  use-physics: false
+  restore-on-disable: true
+  persist-active-puddles: true
